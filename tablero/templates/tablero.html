@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Tablero Principal (Solo Vista) - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 flex flex-col">
+    <!-- Header -->
+    <div class="bg-white bg-opacity-10 backdrop-blur-md text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">🎯 Tablero de Preguntas (Solo Vista)</h1>
+            <div id="game-indicator" class="px-4 py-2 bg-red-500 rounded-full text-sm font-medium">
+                En Espera
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contenido Principal -->
+    <div class="flex-1 flex items-center justify-center p-6">
+        <div class="container mx-auto max-w-4xl">
+            
+            <!-- Estado de Espera -->
+            <div id="waiting-state" class="text-center text-white">
+                <div class="text-6xl mb-6">🎲</div>
+                <h2 class="text-4xl font-bold mb-4">Esperando Pregunta</h2>
+                <p class="text-xl text-blue-200">El moderador enviará la próxima pregunta...</p>
+                <div class="mt-8">
+                    <div class="animate-pulse-slow inline-block w-3 h-3 bg-white rounded-full mx-1"></div>
+                    <div class="animate-pulse-slow inline-block w-3 h-3 bg-white rounded-full mx-1" style="animation-delay: 0.2s"></div>
+                    <div class="animate-pulse-slow inline-block w-3 h-3 bg-white rounded-full mx-1" style="animation-delay: 0.4s"></div>
+                </div>
+            </div>
+            
+            <!-- Pregunta Activa -->
+            <div id="question-display" class="hidden">
+                <!-- Pregunta -->
+                <div class="bg-white rounded-2xl shadow-2xl p-8 mb-8 slide-in">
+                    <div class="text-center">
+                        <div id="question-category" class="text-sm font-medium text-blue-600 bg-blue-100 px-3 py-1 rounded-full inline-block mb-4">
+                            Categoría
+                        </div>
+                        <div id="target-team-indicator" class="hidden text-sm font-medium px-3 py-1 rounded-full inline-block mb-4">
+                            <!-- Indicador de equipo objetivo -->
+                        </div>
+                        <h2 id="question-text" class="text-3xl md:text-4xl font-bold text-gray-800 mb-6 leading-tight">
+                            Pregunta aparecerá aquí
+                        </h2>
+                        <div id="question-difficulty" class="text-lg text-gray-600">
+                            <span class="font-medium">Dificultad:</span> <span id="difficulty-level">1</span>/5
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Opciones de Respuesta (Solo Vista) -->
+                <div id="answer-options" class="grid gap-4">
+                    <!-- Las opciones se mostrarán solo visualmente -->
+                </div>
+                
+                <!-- Respuesta Correcta (inicialmente oculta) -->
+                <div id="correct-answer-display" class="hidden mt-8">
+                    <div class="bg-green-500 text-white rounded-2xl shadow-2xl p-6 text-center slide-in">
+                        <div class="text-2xl font-bold mb-2">✅ Respuesta Correcta</div>
+                        <div id="correct-answer-text" class="text-xl">
+                            Respuesta correcta aparecerá aquí
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Resultado del Equipo -->
+                <div id="team-result" class="hidden mt-6">
+                    <div id="team-result-content" class="rounded-2xl shadow-2xl p-6 text-center text-white slide-in">
+                        <!-- Contenido dinámico -->
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- Footer con Información -->
+    <div class="bg-white bg-opacity-10 backdrop-blur-md text-white p-4">
+        <div class="container mx-auto text-center">
+            <p class="text-sm">
+                📱 Respuestas: 
+                <a href="/respuestas/team1" class="text-blue-300 underline hover:text-blue-100">Equipo Azul</a> | 
+                <a href="/respuestas/team2" class="text-red-300 underline hover:text-red-100">Equipo Rojo</a> | 
+                <a href="/marcador" class="text-yellow-300 underline hover:text-yellow-100">Marcador</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Información para Moderadores -->
+<div class="fixed bottom-4 right-4 bg-black bg-opacity-70 text-white p-3 rounded-lg text-sm max-w-xs">
+    <p class="font-medium mb-1">💡 Tablero Solo Vista</p>
+    <p class="text-xs">Los equipos responden desde sus paneles móviles</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/tablero.js"></script>
+{% endblock %}

@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Marcador de Equipos - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <!-- Header -->
+    <div class="bg-white bg-opacity-10 backdrop-blur-md text-white p-6">
+        <div class="container mx-auto text-center">
+            <h1 class="text-3xl font-bold">🏆 Marcador de Equipos</h1>
+            <p class="text-gray-300 mt-2">Seguimiento en tiempo real</p>
+        </div>
+    </div>
+    
+    <!-- Marcador Principal -->
+    <div class="container mx-auto px-6 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            
+            <!-- Equipo Azul -->
+            <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl shadow-2xl p-8 text-white transform transition-all duration-500 hover:scale-105" id="team1-card">
+                <div class="text-center">
+                    <div class="text-6xl mb-4">🔵</div>
+                    <h2 id="team1-name" class="text-2xl font-bold mb-4">Equipo Azul</h2>
+                    <div id="team1-score" class="text-6xl font-bold mb-4 score-display">0</div>
+                    <div class="text-blue-200 text-sm">PUNTOS</div>
+                    
+                    <!-- Estadísticas -->
+                    <div class="mt-6 grid grid-cols-2 gap-4">
+                        <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                            <div id="team1-correct" class="text-2xl font-bold">0</div>
+                            <div class="text-xs text-blue-200">Correctas</div>
+                        </div>
+                        <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                            <div id="team1-wrong" class="text-2xl font-bold">0</div>
+                            <div class="text-xs text-blue-200">Incorrectas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Equipo Rojo -->
+            <div class="bg-gradient-to-br from-red-600 to-red-800 rounded-2xl shadow-2xl p-8 text-white transform transition-all duration-500 hover:scale-105" id="team2-card">
+                <div class="text-center">
+                    <div class="text-6xl mb-4">🔴</div>
+                    <h2 id="team2-name" class="text-2xl font-bold mb-4">Equipo Rojo</h2>
+                    <div id="team2-score" class="text-6xl font-bold mb-4 score-display">0</div>
+                    <div class="text-red-200 text-sm">PUNTOS</div>
+                    
+                    <!-- Estadísticas -->
+                    <div class="mt-6 grid grid-cols-2 gap-4">
+                        <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                            <div id="team2-correct" class="text-2xl font-bold">0</div>
+                            <div class="text-xs text-red-200">Correctas</div>
+                        </div>
+                        <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                            <div id="team2-wrong" class="text-2xl font-bold">0</div>
+                            <div class="text-xs text-red-200">Incorrectas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <!-- Pregunta Actual -->
+        <div class="bg-white rounded-2xl shadow-2xl p-6 mb-8" id="current-question-card">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">📝 Pregunta Actual</h3>
+            <div id="current-question-text" class="text-gray-600 text-center">
+                No hay pregunta activa en este momento
+            </div>
+        </div>
+        
+        <!-- Historial de Respuestas -->
+        <div class="bg-white rounded-2xl shadow-2xl p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">📊 Historial de Respuestas</h3>
+            <div id="answer-history" class="space-y-3">
+                <p class="text-gray-500 text-center">El historial aparecerá aquí cuando empiecen las respuestas</p>
+            </div>
+        </div>
+        
+        <!-- Estadísticas Generales -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl p-6 text-white text-center">
+                <div class="text-3xl font-bold" id="total-questions">0</div>
+                <div class="text-yellow-100">Preguntas Totales</div>
+            </div>
+            <div class="bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-6 text-white text-center">
+                <div class="text-3xl font-bold" id="total-correct">0</div>
+                <div class="text-green-100">Respuestas Correctas</div>
+            </div>
+            <div class="bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl p-6 text-white text-center">
+                <div class="text-3xl font-bold" id="accuracy-rate">0%</div>
+                <div class="text-purple-100">Precisión General</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Efecto de Celebración -->
+<div id="celebration-overlay" class="fixed inset-0 pointer-events-none z-50 hidden">
+    <div class="celebration-confetti"></div>
+</div>
+
+<style>
+    @keyframes confetti {
+        0% { transform: translateY(-100vh) rotate(0deg); }
+        100% { transform: translateY(100vh) rotate(720deg); }
+    }
+    
+    .celebration-confetti::before,
+    .celebration-confetti::after {
+        content: '';
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: #ffd700;
+        left: 50%;
+        animation: confetti 3s linear infinite;
+    }
+    
+    .celebration-confetti::before {
+        left: 20%;
+        animation-delay: -0.5s;
+        background: #ff6b6b;
+    }
+    
+    .celebration-confetti::after {
+        left: 80%;
+        animation-delay: -1s;
+        background: #4ecdc4;
+    }
+    
+    .pulse-winner {
+        animation: pulse 1s ease-in-out 3;
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/marcador.js"></script>
+{% endblock %}

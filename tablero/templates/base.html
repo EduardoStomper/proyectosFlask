@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema de Tablero - Juego de Preguntas{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': {
+                            600: '#2563eb',
+                            700: '#1d4ed8'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-light': 'bounce 1s ease-in-out 3'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes scoreUpdate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .score-update {
+            animation: scoreUpdate 0.6s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    {% block content %}{% endblock %}
+    
+    <script>
+        // Configuración global del socket
+        const socket = io();
+        
+        // Función de utilidad para mostrar notificaciones
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+            } text-white slide-in`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // Manejo de errores de conexión
+        socket.on('connect_error', () => {
+            showNotification('Error de conexión al servidor', 'error');
+        });
+        
+        socket.on('disconnect', () => {
+            showNotification('Conexión perdida. Intentando reconectar...', 'error');
+        });
+        
+        socket.on('connect', () => {
+            showNotification('Conectado al servidor', 'success');
+        });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>
