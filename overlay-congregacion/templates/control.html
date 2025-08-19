@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - Overlays Religiosos</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 2px solid #ffd700;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            color: #ffd700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .header p {
+            font-size: 18px;
+            color: #cccccc;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #4a90e2;
+        }
+
+        .control-panel h2 {
+            color: #ffd700;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #4a90e2;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .form-control::placeholder {
+            color: #cccccc;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #357abd, #2968a3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #1e7e34, #155724);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c82333, #a71e2a);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+            color: #000;
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #e0a800, #d39e00);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.online {
+            background: #28a745;
+            box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+        }
+
+        .status-indicator.offline {
+            background: #dc3545;
+            box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
+        }
+
+        .urls-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #ffd700;
+        }
+
+        .urls-section h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .url-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4a90e2;
+        }
+
+        .url-item h3 {
+            color: #ffd700;
+            margin-bottom: 8px;
+        }
+
+        .url-item code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 5px;
+            display: block;
+            color: #87ceeb;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+
+        .alert-error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✝ Panel de Control - Overlays Religiosos ✝</h1>
+            <p>Sistema de gestión para transmisiones de servicios religiosos</p>
+            <div style="margin-top: 15px;">
+                <span class="status-indicator" id="connectionStatus"></span>
+                <span id="connectionText">Conectando...</span>
+            </div>
+        </div>
+
+        <div class="alert alert-success" id="successAlert"></div>
+        <div class="alert alert-error" id="errorAlert"></div>
+
+        <div class="controls-grid">
+            <!-- Control de Marquesina -->
+            <div class="control-panel">
+                <h2>📜 Control de Marquesina</h2>
+                
+                <div class="form-group">
+                    <label for="marqueeText">Texto de la marquesina:</label>
+                    <textarea 
+                        class="form-control" 
+                        id="marqueeText" 
+                        placeholder="Ejemplo: Bienvenidos a Iglesia Agua Viva ✝ Servicio Dominical - 10:00 AM 🙏"
+                    >{{ state.marquee.text }}</textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="updateMarquee()">
+                        Actualizar Texto
+                    </button>
+                    <button class="btn btn-warning" onclick="toggleMarquee()" id="toggleMarqueeBtn">
+                        {{ 'Ocultar' if state.marquee.visible else 'Mostrar' }} Marquesina
+                    </button>
+                </div>
+            </div>
+
+            <!-- Control de Transición -->
+            <div class="control-panel">
+                <h2>🔄 Control de Transición</h2>
+                
+                <div class="form-group">
+                    <label for="transitionMessage">Mensaje principal:</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        id="transitionMessage" 
+                        placeholder="Mientras tanto..."
+                        value="{{ state.transition.message }}"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="churchName">Nombre de la iglesia:</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        id="churchName" 
+                        placeholder="Iglesia Agua Viva"
+                        value="{{ state.transition.church_name }}"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="serviceInfo">Información del servicio:</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        id="serviceInfo" 
+                        placeholder="Servicio Dominical - 10:00 AM"
+                        value="{{ state.transition.service_info }}"
+                    >
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-success" onclick="showTransition()">
+                        Mostrar Transición
+                    </button>
+                    <button class="btn btn-danger" onclick="hideTransition()">
+                        Ocultar Transición
+                    </button>
+                    <button class="btn btn-primary" onclick="updateTransition()">
+                        Actualizar Datos
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- URLs para OBS -->
+        <div class="urls-section">
+            <h2>🎥 URLs para OBS Studio</h2>
+            <p style="text-align: center; margin-bottom: 20px; color: #cccccc;">
+                Copia estas URLs en OBS como "Browser Source" con resolución 1920x1080
+            </p>
+            
+            <div class="url-item">
+                <h3>Marquesina (pie de pantalla)</h3>
+                <code id="marqueeUrl">http://localhost:5000/overlay/marquee</code>
+            </div>
+            
+            <div class="url-item">
+                <h3>Pantalla de transición</h3>
+                <code id="transitionUrl">http://localhost:5000/overlay/transition</code>
+            </div>
+            
+            <div class="url-item">
+                <h3>Panel de control</h3>
+                <code id="controlUrl">http://localhost:5000/control</code>
+            </div>
+        </div>
+    </div>
+
+    <div class="connection-status" id="connectionStatusFixed"></div>
+
+    <script>
+        // Configuración del WebSocket
+        const socket = io();
+        
+        // Elementos del DOM
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const connectionText = document.getElementById('connectionText');
+        const connectionStatusFixed = document.getElementById('connectionStatusFixed');
+        const toggleMarqueeBtn = document.getElementById('toggleMarqueeBtn');
+        
+        // Estado actual
+        let currentState = {{ state | tojson }};
+        
+        // Función para mostrar alertas
+        function showAlert(message, isError = false) {
+            hideAlerts();
+            
+            const alert = isError ? errorAlert : successAlert;
+            alert.textContent = message;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+        
+        function hideAlerts() {
+            successAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
+        }
+        
+        // Función para actualizar estado de conexión
+        function updateConnectionStatus(connected) {
+            if (connected) {
+                connectionStatus.className = 'status-indicator online';
+                connectionText.textContent = 'Conectado';
+                connectionStatusFixed.textContent = '🟢 Conectado';
+                connectionStatusFixed.style.background = 'rgba(40, 167, 69, 0.2)';
+                connectionStatusFixed.style.border = '1px solid #28a745';
+                connectionStatusFixed.style.color = '#28a745';
+            } else {
+                connectionStatus.className = 'status-indicator offline';
+                connectionText.textContent = 'Desconectado';
+                connectionStatusFixed.textContent = '🔴 Desconectado';
+                connectionStatusFixed.style.background = 'rgba(220, 53, 69, 0.2)';
+                connectionStatusFixed.style.border = '1px solid #dc3545';
+                connectionStatusFixed.style.color = '#dc3545';
+            }
+        }
+        
+        // Funciones de API
+        async function updateMarquee() {
+            const text = document.getElementById('marqueeText').value.trim();
+            
+            if (!text) {
+                showAlert('El texto no puede estar vacío', true);
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/update_marquee', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(data.message);
+                    currentState.marquee.text = text;
+                } else {
+                    showAlert(data.error, true);
+                }
+            } catch (error) {
+                showAlert('Error de conexión: ' + error.message, true);
+            }
+        }
+        
+        async function toggleMarquee() {
+            try {
+                const response = await fetch('/api/toggle_marquee', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(data.message);
+                    currentState.marquee.visible = data.visible;
+                    toggleMarqueeBtn.textContent = data.visible ? 'Ocultar Marquesina' : 'Mostrar Marquesina';
+                } else {
+                    showAlert(data.error, true);
+                }
+            } catch (error) {
+                showAlert('Error de conexión: ' + error.message, true);
+            }
+        }
+        
+        async function showTransition() {
+            try {
+                const response = await fetch('/api/show_transition', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(data.message);
+                } else {
+                    showAlert(data.error, true);
+                }
+            } catch (error) {
+                showAlert('Error de conexión: ' + error.message, true);
+            }
+        }
+        
+        async function hideTransition() {
+            try {
+                const response = await fetch('/api/hide_transition', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(data.message);
+                } else {
+                    showAlert(data.error, true);
+                }
+            } catch (error) {
+                showAlert('Error de conexión: ' + error.message, true);
+            }
+        }
+        
+        async function updateTransition() {
+            const message = document.getElementById('transitionMessage').value.trim();
+            const churchName = document.getElementById('churchName').value.trim();
+            const serviceInfo = document.getElementById('serviceInfo').value.trim();
+            
+            try {
+                const response = await fetch('/api/update_transition', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        church_name: churchName,
+                        service_info: serviceInfo
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(data.message);
+                } else {
+                    showAlert(data.error, true);
+                }
+            } catch (error) {
+                showAlert('Error de conexión: ' + error.message, true);
+            }
+        }
+        
+        // Eventos del WebSocket
+        socket.on('connect', function() {
+            console.log('Conectado al servidor');
+            updateConnectionStatus(true);
+        });
+        
+        socket.on('disconnect', function() {
+            console.log('Desconectado del servidor');
+            updateConnectionStatus(false);
+        });
+        
+        socket.on('connect_error', function(error) {
+            console.error('Error de conexión:', error);
+            updateConnectionStatus(false);
+        });
+        
+        socket.on('marquee_update', function(data) {
+            console.log('Actualización de marquesina recibida');
+            // Actualizar estado local si es necesario
+        });
+        
+        socket.on('transition_update', function(data) {
+            console.log('Actualización de transición recibida');
+            // Actualizar estado local si es necesario
+        });
+        
+        // Atajos de teclado
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey) {
+                switch(e.key) {
+                    case 'Enter':
+                        e.preventDefault();
+                        updateMarquee();
+                        break;
+                    case 't':
+                        e.preventDefault();
+                        showTransition();
+                        break;
+                    case 'h':
+                        e.preventDefault();
+                        hideTransition();
+                        break;
+                    case 'm':
+                        e.preventDefault();
+                        toggleMarquee();
+                        break;
+                }
+            }
+        });
+        
+        // Actualizar URLs dinámicamente
+        document.addEventListener('DOMContentLoaded', function() {
+            const baseUrl = window.location.origin;
+            document.getElementById('marqueeUrl').textContent = baseUrl + '/overlay/marquee';
+            document.getElementById('transitionUrl').textContent = baseUrl + '/overlay/transition';
+            document.getElementById('controlUrl').textContent = baseUrl + '/control';
+            
+            // Mostrar estado inicial de conexión
+            updateConnectionStatus(false);
+        });
+    </script>
+</body>
+</html>

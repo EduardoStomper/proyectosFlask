@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>Transición - Overlay</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 1920px;
+            height: 1080px;
+            background: transparent;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        .transition-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease-in-out;
+        }
+
+        .transition-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .content-container {
+            text-align: center;
+            color: #ffffff;
+            max-width: 800px;
+            padding: 40px;
+        }
+
+        .cross-icon {
+            font-size: 120px;
+            color: #ffd700;
+            margin-bottom: 30px;
+            animation: pulse-cross 2s ease-in-out infinite;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+        }
+
+        @keyframes pulse-cross {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        .main-message {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+            letter-spacing: 2px;
+        }
+
+        .church-name {
+            font-size: 36px;
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+        }
+
+        .service-info {
+            font-size: 24px;
+            color: #cccccc;
+            margin-bottom: 40px;
+            font-style: italic;
+        }
+
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: #ffd700;
+            border-radius: 50%;
+            animation: loading-pulse 1.5s ease-in-out infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes loading-pulse {
+            0%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        /* Efecto de partículas de luz */
+        .light-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: #ffd700;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float-particle 8s linear infinite;
+        }
+
+        @keyframes float-particle {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-50px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Efecto de brillo de fondo */
+        .background-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200%;
+            height: 200%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(
+                circle,
+                rgba(255, 215, 0, 0.1) 0%,
+                rgba(255, 215, 0, 0.05) 30%,
+                transparent 70%
+            );
+            animation: glow-rotate 10s linear infinite;
+        }
+
+        @keyframes glow-rotate {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        .bible-verse {
+            font-size: 18px;
+            color: #e0e0e0;
+            font-style: italic;
+            margin-top: 30px;
+            opacity: 0.8;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <div class="transition-overlay" id="transitionOverlay">
+        <div class="background-glow"></div>
+        <div class="light-particles" id="lightParticles"></div>
+        
+        <div class="content-container">
+            <div class="cross-icon">✝</div>
+            <div class="main-message" id="mainMessage">{{ initial_state.message }}</div>
+            <div class="church-name" id="churchName">{{ initial_state.church_name }}</div>
+            <div class="service-info" id="serviceInfo">{{ initial_state.service_info }}</div>
+            
+            <div class="loading-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            
+            <div class="bible-verse">
+                "Porque donde están dos o tres congregados en mi nombre, allí estoy yo en medio de ellos." - Mateo 18:20
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración del WebSocket
+        const socket = io();
+        
+        // Elementos del DOM
+        const transitionOverlay = document.getElementById('transitionOverlay');
+        const mainMessage = document.getElementById('mainMessage');
+        const churchName = document.getElementById('churchName');
+        const serviceInfo = document.getElementById('serviceInfo');
+        const lightParticles = document.getElementById('lightParticles');
+        
+        // Estado inicial
+        let isVisible = {{ 'true' if initial_state.visible else 'false' }};
+        
+        // Función para crear partículas de luz
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            // Tamaño aleatorio
+            const size = Math.random() * 4 + 2;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            
+            // Posición aleatoria en X
+            particle.style.left = Math.random() * 100 + '%';
+            
+            // Duración aleatoria
+            const duration = Math.random() * 5 + 5;
+            particle.style.animationDuration = duration + 's';
+            
+            // Delay aleatorio
+            particle.style.animationDelay = Math.random() * 2 + 's';
+            
+            lightParticles.appendChild(particle);
+            
+            // Remover después de la animación
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, (duration + 2) * 1000);
+        }
+        
+        // Función para iniciar las partículas
+        function startParticles() {
+            // Crear partículas iniciales
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => createParticle(), i * 200);
+            }
+            
+            // Crear partículas continuas
+            setInterval(() => {
+                if (isVisible) {
+                    createParticle();
+                }
+            }, 800);
+        }
+        
+        // Función para actualizar la transición
+        function updateTransition(data) {
+            if (data.message) {
+                mainMessage.textContent = data.message;
+            }
+            
+            if (data.church_name) {
+                churchName.textContent = data.church_name;
+            }
+            
+            if (data.service_info) {
+                serviceInfo.textContent = data.service_info;
+            }
+            
+            if (typeof data.visible !== 'undefined') {
+                isVisible = data.visible;
+                if (isVisible) {
+                    transitionOverlay.classList.add('visible');
+                } else {
+                    transitionOverlay.classList.remove('visible');
+                }
+            }
+        }
+        
+        // Eventos del WebSocket
+        socket.on('connect', function() {
+            console.log('Conectado al servidor');
+        });
+        
+        socket.on('transition_update', function(data) {
+            console.log('Actualización de transición recibida:', data);
+            updateTransition(data);
+        });
+        
+        socket.on('initial_state', function(data) {
+            console.log('Estado inicial recibido:', data);
+            if (data.transition) {
+                updateTransition(data.transition);
+            }
+        });
+        
+        socket.on('disconnect', function() {
+            console.log('Desconectado del servidor');
+        });
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            // Aplicar estado inicial de visibilidad
+            if (isVisible) {
+                transitionOverlay.classList.add('visible');
+            }
+            
+            // Iniciar partículas
+            startParticles();
+            
+            console.log('Transición inicializada');
+        });
+        
+        // Manejo de errores de conexión
+        socket.on('connect_error', function(error) {
+            console.error('Error de conexión:', error);
+        });
+        
+        socket.on('reconnect', function(attemptNumber) {
+            console.log('Reconectado después de', attemptNumber, 'intentos');
+        });
+    </script>
+</body>
+</html>

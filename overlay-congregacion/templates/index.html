@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overlays Religiosos - Página Principal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 50px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            border: 3px solid #ffd700;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            color: #ffd700;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        .header p {
+            font-size: 20px;
+            color: #cccccc;
+            line-height: 1.6;
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .link-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid #4a90e2;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .link-card:hover {
+            transform: translateY(-5px);
+            border-color: #ffd700;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .link-card h2 {
+            font-size: 24px;
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+
+        .link-card p {
+            color: #cccccc;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .link-card .url {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            color: #87ceeb;
+            word-break: break-all;
+            font-size: 14px;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid #28a745;
+            text-align: left;
+        }
+
+        .instructions h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .instructions ol {
+            color: #cccccc;
+            line-height: 1.8;
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        .instructions strong {
+            color: #ffffff;
+        }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 32px;
+            }
+            
+            .header p {
+                font-size: 16px;
+            }
+            
+            .links-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✝ Overlays para Transmisión Religiosa ✝</h1>
+            <p>Sistema completo de overlays web para servicios religiosos en Facebook y otras plataformas de streaming</p>
+        </div>
+
+        <div class="links-grid">
+            <a href="/overlay/marquee" class="link-card" target="_blank">
+                <span class="icon">📜</span>
+                <h2>Marquesina</h2>
+                <p>Barra inferior negra con texto desplazándose, iconos religiosos y efectos de brillo</p>
+                <div class="url" id="marqueeUrl">Cargando URL...</div>
+            </a>
+
+            <a href="/overlay/transition" class="link-card" target="_blank">
+                <span class="icon">🔄</span>
+                <h2>Pantalla de Transición</h2>
+                <p>Overlay completo con mensaje "Mientras tanto", cruz dorada animada y efectos de partículas</p>
+                <div class="url" id="transitionUrl">Cargando URL...</div>
+            </a>
+
+            <a href="/control" class="link-card">
+                <span class="icon">🎛️</span>
+                <h2>Panel de Control</h2>
+                <p>Interfaz administrativa para gestionar ambos overlays en tiempo real</p>
+                <div class="url" id="controlUrl">Cargando URL...</div>
+            </a>
+        </div>
+
+        <div class="instructions">
+            <h2>📋 Instrucciones de Configuración para OBS Studio</h2>
+            <ol>
+                <li><strong>Abrir OBS Studio</strong> y crear una nueva escena o seleccionar una existente</li>
+                <li><strong>Agregar nueva fuente:</strong> Hacer clic en el botón "+" en el panel de fuentes</li>
+                <li><strong>Seleccionar "Browser Source"</strong> (Fuente del navegador)</li>
+                <li><strong>Configurar la fuente:</strong>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>URL: Copiar la URL del overlay deseado (marquesina o transición)</li>
+                        <li>Ancho: 1920</li>
+                        <li>Alto: 1080</li>
+                        <li>Marcar "Refresh browser when scene becomes active"</li>
+                    </ul>
+                </li>
+                <li><strong>Para la marquesina:</strong> Posicionar en la parte inferior de la pantalla</li>
+                <li><strong>Para la transición:</strong> Cubrir toda la pantalla (capa superior)</li>
+                <li><strong>Usar el panel de control</strong> para actualizar textos y mostrar/ocultar overlays en tiempo real</li>
+            </ol>
+        </div>
+
+        <div class="footer">
+            <p>Sistema desarrollado para transmisiones religiosas • Compatible con OBS Studio</p>
+            <p>Puerto: 5000 • WebSockets habilitados para actualizaciones en tiempo real</p>
+        </div>
+    </div>
+
+    <script>
+        // Actualizar URLs dinámicamente
+        document.addEventListener('DOMContentLoaded', function() {
+            const baseUrl = window.location.origin;
+            document.getElementById('marqueeUrl').textContent = baseUrl + '/overlay/marquee';
+            document.getElementById('transitionUrl').textContent = baseUrl + '/overlay/transition';
+            document.getElementById('controlUrl').textContent = baseUrl + '/control';
+        });
+    </script>
+</body>
+</html>

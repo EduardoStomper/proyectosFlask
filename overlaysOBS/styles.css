@@ -1,0 +1,245 @@
+/* Reset y configuración base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: transparent;
+    overflow: hidden;
+}
+
+/* Overlay Marcador */
+.overlay-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px;
+}
+
+.scoreboard {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 3px solid #00d4ff;
+    border-radius: 15px;
+    padding: 20px 40px;
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+    margin-bottom: 20px;
+}
+
+.team {
+    text-align: center;
+    min-width: 200px;
+}
+
+.team-name {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.team-score {
+    font-size: 72px;
+    font-weight: bold;
+    color: #00d4ff;
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+}
+
+.separator {
+    font-size: 36px;
+    font-weight: bold;
+    color: #ffffff;
+    margin: 0 40px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.game-info {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+}
+
+.round-info, .timer {
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    border: 2px solid #00d4ff;
+}
+
+.timer {
+    color: #ff6b6b;
+    border-color: #ff6b6b;
+}
+
+/* Overlay Chat */
+.chat-overlay {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 400px;
+    max-height: 500px;
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid #00d4ff;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.chat-header {
+    background: linear-gradient(135deg, #00d4ff, #0099cc);
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+.chat-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.chat-messages {
+    padding: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.chat-message {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    border-left: 4px solid #00d4ff;
+}
+
+.chat-user {
+    font-weight: bold;
+    color: #00d4ff;
+    margin-bottom: 5px;
+}
+
+.chat-text {
+    color: #ffffff;
+    line-height: 1.4;
+}
+
+.chat-time {
+    font-size: 12px;
+    color: #888;
+    margin-top: 5px;
+}
+
+/* Overlay Alertas */
+.alerts-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+.alert-box {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    padding: 30px 40px;
+    border-radius: 20px;
+    box-shadow: 0 0 50px rgba(255, 107, 107, 0.7);
+    text-align: center;
+    animation: alertPulse 2s infinite;
+    border: 4px solid #ffffff;
+    min-width: 400px;
+}
+
+.alert-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.alert-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.alert-message {
+    font-size: 20px;
+    line-height: 1.4;
+}
+
+/* Animaciones */
+@keyframes alertPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 50px rgba(255, 107, 107, 0.7);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 70px rgba(255, 107, 107, 0.9);
+    }
+}
+
+/* Efectos de entrada */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+.slide-in {
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { 
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .scoreboard {
+        flex-direction: column;
+        padding: 15px 20px;
+    }
+    
+    .separator {
+        margin: 15px 0;
+        font-size: 24px;
+    }
+    
+    .team-score {
+        font-size: 48px;
+    }
+    
+    .chat-overlay {
+        width: 300px;
+        bottom: 10px;
+        right: 10px;
+    }
+    
+    .alert-box {
+        min-width: 300px;
+        padding: 20px 25px;
+    }
+}

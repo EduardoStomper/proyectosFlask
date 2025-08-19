@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>Marquesina - Overlay</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 1920px;
+            height: 1080px;
+            background: transparent;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        .marquee-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: #000000;
+            border-top: 3px solid #ffffff;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .marquee-container.hidden {
+            transform: translateY(100%);
+        }
+
+        .marquee-text {
+            white-space: nowrap;
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            animation: scroll-left 30s linear infinite;
+            padding: 0 50px;
+            position: relative;
+        }
+
+        .marquee-text::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                transparent 100%
+            );
+            animation: shine 3s ease-in-out infinite;
+        }
+
+        @keyframes scroll-left {
+            0% {
+                transform: translateX(100vw);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        @keyframes shine {
+            0%, 100% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .icon {
+            display: inline-block;
+            margin: 0 15px;
+            font-size: 28px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        .cross {
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .pray {
+            color: #87ceeb;
+            text-shadow: 0 0 10px rgba(135, 206, 235, 0.5);
+        }
+
+        /* Efecto de brillo adicional */
+        .marquee-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                transparent
+            );
+            animation: sweep 4s ease-in-out infinite;
+        }
+
+        @keyframes sweep {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="marquee-container" id="marqueeContainer">
+        <div class="marquee-text" id="marqueeText">
+            {{ initial_text | safe }}
+        </div>
+    </div>
+
+    <script>
+        // Configuración del WebSocket
+        const socket = io();
+        
+        // Elementos del DOM
+        const marqueeContainer = document.getElementById('marqueeContainer');
+        const marqueeText = document.getElementById('marqueeText');
+        
+        // Estado inicial
+        let isVisible = {{ 'true' if visible else 'false' }};
+        
+        // Función para procesar el texto y agregar iconos
+        function processText(text) {
+            // Agregar iconos religiosos intercalados en el texto
+            const parts = text.split(' ');
+            const processedParts = [];
+            
+            for (let i = 0; i < parts.length; i++) {
+                processedParts.push(parts[i]);
+                
+                // Agregar iconos cada 8-10 palabras
+                if ((i + 1) % 9 === 0) {
+                    const iconType = Math.random() > 0.5 ? 'cross' : 'pray';
+                    const iconSymbol = iconType === 'cross' ? '✝' : '🙏';
+                    processedParts.push(`<span class="icon ${iconType}">${iconSymbol}</span>`);
+                }
+            }
+            
+            return processedParts.join(' ');
+        }
+        
+        // Función para actualizar la marquesina
+        function updateMarquee(data) {
+            if (data.text) {
+                const processedText = processText(data.text);
+                marqueeText.innerHTML = processedText;
+                
+                // Reiniciar animación
+                marqueeText.style.animation = 'none';
+                marqueeText.offsetHeight; // Trigger reflow
+                marqueeText.style.animation = 'scroll-left 30s linear infinite';
+            }
+            
+            if (typeof data.visible !== 'undefined') {
+                isVisible = data.visible;
+                if (isVisible) {
+                    marqueeContainer.classList.remove('hidden');
+                } else {
+                    marqueeContainer.classList.add('hidden');
+                }
+            }
+        }
+        
+        // Eventos del WebSocket
+        socket.on('connect', function() {
+            console.log('Conectado al servidor');
+        });
+        
+        socket.on('marquee_update', function(data) {
+            console.log('Actualización de marquesina recibida:', data);
+            updateMarquee(data);
+        });
+        
+        socket.on('initial_state', function(data) {
+            console.log('Estado inicial recibido:', data);
+            if (data.marquee) {
+                updateMarquee(data.marquee);
+            }
+        });
+        
+        socket.on('disconnect', function() {
+            console.log('Desconectado del servidor');
+        });
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            // Procesar texto inicial
+            const initialText = marqueeText.textContent;
+            marqueeText.innerHTML = processText(initialText);
+            
+            // Aplicar estado inicial de visibilidad
+            if (!isVisible) {
+                marqueeContainer.classList.add('hidden');
+            }
+            
+            console.log('Marquesina inicializada');
+        });
+        
+        // Manejo de errores de conexión
+        socket.on('connect_error', function(error) {
+            console.error('Error de conexión:', error);
+        });
+        
+        socket.on('reconnect', function(attemptNumber) {
+            console.log('Reconectado después de', attemptNumber, 'intentos');
+        });
+    </script>
+</body>
+</html>
